@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+  <title>CubeSatAPP — CesiumJS TLE Orbit Viewer (PWA)</title>
+  <meta name="theme-color" content="#0b1022" />
+  <meta name="description" content="Viewer orbitale di livello professionale: TLE → orbita 3D in CesiumJS con telemetria, PWA offline, ottimizzato per laptop e iPhone." />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link href="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body id="app" class="app-root">
+  <header>
+    <div class="brand">
+      <span class="emoji">🛰️</span>
+      <h1>CubeSatAPP</h1>
+      <span class="ver" title="Build ID">v6.0</span>
+    </div>
+    <nav aria-label="Azioni globali">
+      <button id="btnInstall" class="ghost" hidden>➕ Installa</button>
+      <button id="btnShare" class="ghost" title="Condividi link configurato (se supportato)">🔗 Condividi</button>
+      <button id="btnHelp" class="ghost" title="Guida rapida">❔ Guida</button>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="panel viewer-panel" aria-label="Globo 3D">
+      <div id="viewer" role="application" aria-label="Cesium 3D globe"></div>
+      <div class="hud" id="hud">
+        <div class="chip" id="hudClock">—</div>
+        <div class="chip" id="hudAlt">—</div>
+        <div class="chip" id="hudVel">—</div>
+      </div>
+    </section>
+
+    <section class="panel controls" aria-label="Controlli">
+      <details class="card" open>
+        <summary>📦 Carica TLE</summary>
+        <label for="tle" class="sr-only">Incolla TLE (2 righe) o trascina un file .txt</label>
+        <textarea id="tle" spellcheck="false" placeholder="Incolla qui le due righe TLE"></textarea>
+        <div class="row">
+          <div class="field">
+            <label>Durata (min)</label>
+            <input id="minutes" type="number" value="120" min="10" max="1440" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>Δt (sec)</label>
+            <input id="step" type="number" value="30" min="1" max="600" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>Velocità sim</label>
+            <input id="mult" type="number" value="60" min="1" max="3600" step="1" inputmode="numeric">
+          </div>
+        </div>
+        <div class="row buttons">
+          <button id="simulate" class="primary">▶️ Simula</button>
+          <button id="play" class="secondary">⏯️ Play/Pause</button>
+          <button id="reset" class="ghost">🔄 Reset</button>
+          <button id="btnExportCSV" class="ghost">⬇️ Telemetria CSV</button>
+        </div>
+        <div id="status" class="pill">Stato: pronto</div>
+        <p class="hint">Suggerimenti: (1) Trascina un file .txt TLE (2) Parametri persistono in locale (3) URL supporta <code>?tle=</code> e <code>&minutes=</code>.</p>
+      </details>
+
+      <details class="card" open>
+        <summary>📡 Telemetria</summary>
+        <div class="two">
+          <div>
+            <strong>Satellite</strong>
+            <pre id="telemetry">Altitudine: -
+Velocità: -
+Periodo: -
+Lat/Lon: -</pre>
+          </div>
+          <div>
+            <strong>Sole</strong>
+            <pre id="suninfo">Subsolare: -
+Azimut/Elev: -</pre>
+          </div>
+        </div>
+      </details>
+
+      <details class="card">
+        <summary>🧪 Logger & Debug</summary>
+        <pre id="log" class="log">Log…</pre>
+      </details>
+    </section>
+  </main>
+
+  <footer>
+    <div>MIT © 2025 — CubeSatAPP • Progettato per laptop e iPhone • <a href="https://www.pezzaliapp.com" target="_blank" rel="noopener">pezzaliAPP.com</a></div>
+    <div class="kbd">Scorciatoie: <kbd>L</kbd> play/pause • <kbd>R</kbd> reset • <kbd>?</kbd> guida</div>
+  </footer>
+
+  <dialog id="helpDialog">
+    <form method="dialog">
+      <h2>Guida rapida</h2>
+      <ul>
+        <li>Incolla due righe TLE o trascina un file .txt</li>
+        <li>Configura durata, passo temporale e velocità simulazione</li>
+        <li>Premi <strong>Simula</strong>, poi usa <strong>Play/Pause</strong></li>
+        <li>Condividi la configurazione con <em>Condividi</em> (se supportato)</li>
+        <li>Scarica CSV telemetria in tempo reale</li>
+      </ul>
+      <p class="muted">Suggerimento iPhone: l'altezza è ottimizzata per evitare il notch; il globo resta fluido anche in background tab.</p>
+      <div class="right"><button>Chiudi</button></div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/cesium@1.120.0/Build/Cesium/Cesium.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/satellite.js@4.0.0/dist/satellite.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

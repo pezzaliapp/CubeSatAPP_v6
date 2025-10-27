@@ -1,0 +1,55 @@
+/* CubeSatAPP v6 — laptop + iPhone perfection */
+:root{
+  --bg:#0b1022;--ink:#eaf1ff;--mut:#93a4cc;--line:#1c2550;--card:#101739;--accent:#57e3ff;
+  --vh:1vh;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:radial-gradient(1200px 600px at 50% -20%, #172042, var(--bg));color:var(--ink);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial}
+a{color:#a9d3ff}
+/* Header */
+header{position:sticky;top:0;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 12px;background:#0e1533cc;backdrop-filter:blur(6px);border-bottom:1px solid var(--line);z-index:10}
+.brand{display:flex;align-items:center;gap:8px}
+.brand .emoji{font-size:18px}
+.brand h1{font-size:18px;margin:0}
+.brand .ver{opacity:.65;font-size:12px}
+nav button{margin-left:6px}
+/* Layout */
+main.layout{display:grid;grid-template-columns: 1.4fr 1fr;gap:12px;align-items:start;padding:12px;max-width:1600px;margin:0 auto}
+.panel{min-width:0}
+.viewer-panel{position:relative}
+#viewer{position:relative;width:100%;height:calc(var(--vh)*70);min-height:60vh;border-radius:14px;border:1px solid var(--line);background:#000;overflow:visible;z-index:1}
+.cesium-widget, .cesium-widget canvas{border-radius:14px}
+.hud{position:absolute;left:12px;bottom:12px;display:flex;gap:8px;flex-wrap:wrap;z-index:6}
+.chip{background:#0e1533cc;border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px}
+/* Controls */
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin:0 0 12px 0}
+.card summary{cursor:pointer;list-style:none}
+.card summary::-webkit-details-marker{display:none}
+.card summary{font-weight:600}
+textarea,input,button,pre{width:100%;background:#0f1840;color:var(--ink);border:1px solid var(--line);border-radius:10px;font-family:ui-monospace,monospace}
+textarea{min-height:100px;padding:10px}
+input{padding:8px}
+button{cursor:pointer;padding:10px;margin:4px 2px}
+button.primary{background:linear-gradient(#0f3b55,#0c2f44);border-color:#174a66}
+button.secondary{background:#13224a}
+button.ghost{background:#0f184000}
+.pill{display:inline-block;margin-top:8px;padding:6px 10px;border:1px solid var(--line);border-radius:999px}
+.hint{color:var(--mut);font-size:12px;margin:8px 0 0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row .field{flex:1;min-width:110px}
+.row.buttons{margin-top:6px}
+.log{max-height:200px;overflow:auto;white-space:pre-wrap}
+footer{padding:10px;text-align:center;color:var(--mut)}
+.kbd{font-size:12px;margin-top:4px}
+.right{display:flex;justify-content:flex-end}
+.sr-only{position:absolute;left:-9999px}
+.muted{color:var(--mut)}
+/* iPhone fine-tuning + safe taps */
+@supports (-webkit-touch-callout: none){
+  #viewer{ -webkit-transform:translateZ(0) }
+}
+@media (max-width: 1100px){
+  main.layout{grid-template-columns:1fr}
+  #viewer{min-height:62vh}
+}
