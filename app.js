@@ -1,4 +1,4 @@
-/* CubeSatAPP v6.2 — CesiumJS + satellite.js — capolavoro di robustezza e UX */
+/* CubeSatAPP v6.3 — CesiumJS + satellite.js — capolavoro di robustezza e UX */
 'use strict';
 
 /* iOS fullheight fix */
@@ -153,27 +153,27 @@ function sunECEF(jd){
   }catch{ return null; }
 }
 
-/* --- Mobile full-globe fit ------------------------------------------------ */
+/* --- Mobile full-globe fit (centratura reale + compensazione UI) ---------- */
 function fitFullGlobeMobile(){
-  // Calcolo distanza per vedere l'intero globo (verticalmente) in base al FOV
   const cam = viewer.scene.camera;
-  const fovy = cam.frustum.fovy;           // FOV verticale corrente
-  const r = Cesium.Ellipsoid.WGS84.maximumRadius; // ~6378137 m
-  // Distanza dal centro necessaria a includere l'intera sfera: d = r / sin(fovy/2)
-  // Margine 1.08 per UI overlay / notch.
-  const dFromCenter = (r / Math.sin(fovy/2)) * 1.08;
-  const altitude = dFromCenter - r;
+  const fovy = cam.frustum.fovy;
+  const r = Cesium.Ellipsoid.WGS84.maximumRadius;        // ~6.378e6 m
 
-  // Posiziona la camera sopra (0,0) guardando il centro della Terra
+  // Distanza dal centro per includere tutta la sfera nel FOV verticale
+  // margine 1.10 per HUD/overlay/notch
+  const dFromCenter = (r / Math.sin(fovy/2)) * 1.10;
+  const altitude = Math.max(1, dFromCenter - r);
+
+  // Centro sul meridiano 0/0 e guarda verso il centro Terra
   const destination = Cesium.Cartesian3.fromRadians(0, 0, altitude);
   cam.flyTo({
     destination,
     orientation: {
-      heading: 0.0,
-      pitch: -Cesium.Math.PI_OVER_TWO, // guarda verso il centro
+      heading: Cesium.Math.toRadians(18),      // leggero offset a destra: compensa la sensazione di “spinta a sx”
+      pitch: -Cesium.Math.PI_OVER_TWO,         // camera “sopra” il centro
       roll: 0.0
     },
-    duration: 0.6
+    duration: 0.5
   });
 }
 /* ------------------------------------------------------------------------- */
@@ -226,7 +226,7 @@ function simulate(){
     viewer.clock.multiplier = Math.max(1, +elMult.value||60);
     viewer.clock.shouldAnimate = true;
 
-    // Camera: desktop = come prima; iPhone = fit globo intero
+    // Camera: desktop = come v6.0; iPhone = globe fit
     viewer.trackedEntity = undefined;
     const isIphone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     if (isIphone){
