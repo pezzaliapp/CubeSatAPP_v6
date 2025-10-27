@@ -1,4 +1,4 @@
-/* CubeSatAPP v6 — CesiumJS + satellite.js — capolavoro di robustezza e UX */
+/* CubeSatAPP v6.1 — CesiumJS + satellite.js — capolavoro di robustezza e UX */
 'use strict';
 
 /* iOS fullheight fix */
@@ -164,7 +164,7 @@ function simulate(){
     const stepSec = Math.max(1, parseInt(elStep.value||'30',10));
 
     if(satEntity) viewer.entities.remove(satEntity);
-    const { pos, start } = buildPositionsFromTLE(l1, l2, minutes, stepSec);
+    const { pos/*, start*/ } = buildPositionsFromTLE(l1, l2, minutes, stepSec);
     samples = pos;
 
     // Label dinamica Alt/Vel live
@@ -201,11 +201,19 @@ function simulate(){
     viewer.clock.multiplier = Math.max(1, +elMult.value||60);
     viewer.clock.shouldAnimate = true;
 
-    // Camera safe pose
-    const safeOffset = new Cesium.HeadingPitchRange(0.0, Cesium.Math.toRadians(-35), 12_000_000);
+    // Camera safe pose adattiva (desktop vs iPhone)
     viewer.trackedEntity = undefined;
     satEntity.viewFrom = new Cesium.Cartesian3(-9_000_000, 9_000_000, 5_000_000);
-    viewer.flyTo(satEntity, { offset: safeOffset, duration: 0.0 });
+
+    const isIphone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const offset = isIphone
+      ? new Cesium.HeadingPitchRange(0.0, Cesium.Math.toRadians(-10), 9_000_000)
+      : new Cesium.HeadingPitchRange(0.0, Cesium.Math.toRadians(-35), 12_000_000);
+
+    viewer.flyTo(satEntity, {
+      offset,
+      duration: isIphone ? 1.2 : 0.0
+    });
 
     // Period from mean motion
     const period = meanMotionToPeriodSeconds(l2);
