@@ -1,4 +1,4 @@
-/* CubeSatAPP v6.1 — CesiumJS + satellite.js — capolavoro di robustezza e UX */
+/* CubeSatAPP v6.2 — CesiumJS + satellite.js — capolavoro di robustezza e UX */
 'use strict';
 
 /* iOS fullheight fix */
@@ -153,6 +153,31 @@ function sunECEF(jd){
   }catch{ return null; }
 }
 
+/* --- Mobile full-globe fit ------------------------------------------------ */
+function fitFullGlobeMobile(){
+  // Calcolo distanza per vedere l'intero globo (verticalmente) in base al FOV
+  const cam = viewer.scene.camera;
+  const fovy = cam.frustum.fovy;           // FOV verticale corrente
+  const r = Cesium.Ellipsoid.WGS84.maximumRadius; // ~6378137 m
+  // Distanza dal centro necessaria a includere l'intera sfera: d = r / sin(fovy/2)
+  // Margine 1.08 per UI overlay / notch.
+  const dFromCenter = (r / Math.sin(fovy/2)) * 1.08;
+  const altitude = dFromCenter - r;
+
+  // Posiziona la camera sopra (0,0) guardando il centro della Terra
+  const destination = Cesium.Cartesian3.fromRadians(0, 0, altitude);
+  cam.flyTo({
+    destination,
+    orientation: {
+      heading: 0.0,
+      pitch: -Cesium.Math.PI_OVER_TWO, // guarda verso il centro
+      roll: 0.0
+    },
+    duration: 0.6
+  });
+}
+/* ------------------------------------------------------------------------- */
+
 /* Simulation */
 function simulate(){
   try{
@@ -201,19 +226,16 @@ function simulate(){
     viewer.clock.multiplier = Math.max(1, +elMult.value||60);
     viewer.clock.shouldAnimate = true;
 
-    // Camera safe pose adattiva (desktop vs iPhone)
+    // Camera: desktop = come prima; iPhone = fit globo intero
     viewer.trackedEntity = undefined;
-    satEntity.viewFrom = new Cesium.Cartesian3(-9_000_000, 9_000_000, 5_000_000);
-
     const isIphone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    const offset = isIphone
-      ? new Cesium.HeadingPitchRange(0.0, Cesium.Math.toRadians(-10), 9_000_000)
-      : new Cesium.HeadingPitchRange(0.0, Cesium.Math.toRadians(-35), 12_000_000);
-
-    viewer.flyTo(satEntity, {
-      offset,
-      duration: isIphone ? 1.2 : 0.0
-    });
+    if (isIphone){
+      fitFullGlobeMobile();
+    } else {
+      const safeOffset = new Cesium.HeadingPitchRange(0.0, Cesium.Math.toRadians(-35), 12_000_000);
+      satEntity.viewFrom = new Cesium.Cartesian3(-9_000_000, 9_000_000, 5_000_000);
+      viewer.flyTo(satEntity, { offset: safeOffset, duration: 0.0 });
+    }
 
     // Period from mean motion
     const period = meanMotionToPeriodSeconds(l2);
